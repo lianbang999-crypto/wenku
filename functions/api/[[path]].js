@@ -231,8 +231,8 @@ async function syncR2ToD1(db, r2) {
         }
       }
 
-      // 生成 ID
-      const id = generateDocId(parsed);
+      // 使用 R2 key 生成唯一 ID
+      const id = generateDocId(key, parsed);
 
       await db.prepare(
         `INSERT INTO documents (id, title, type, category, series_name, episode_num, format, r2_bucket, r2_key, content, file_size, created_at, updated_at)
@@ -303,12 +303,11 @@ function parseR2Key(key) {
   return null;
 }
 
-function generateDocId(parsed) {
-  const base = slugify(parsed.category);
-  if (parsed.seriesName && parsed.episodeNum !== null) {
-    return `${base}-${slugify(parsed.seriesName)}-${String(parsed.episodeNum).padStart(2, '0')}`;
-  }
-  return `${base}-${slugify(parsed.title)}`;
+function generateDocId(r2Key, parsed) {
+  // 基于 R2 key 生成唯一 ID，确保不冲突
+  // 使用简易哈希：取 r2_key 的关键部分做 slug
+  const keySlug = slugify(r2Key.replace(/\.\w+$/, ''));
+  return keySlug.slice(0, 80);
 }
 
 function slugify(str) {
