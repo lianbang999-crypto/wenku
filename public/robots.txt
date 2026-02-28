@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://wenku.foyue.org/sitemap.xml

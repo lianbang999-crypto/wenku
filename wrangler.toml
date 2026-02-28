@@ -1,0 +1,11 @@
+name = "foyue-wenku"
+compatibility_date = "2024-12-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "foyue-db"
+database_id = "placeholder-update-with-real-id"
+
+[[r2_buckets]]
+binding = "R2_WENKU"
+bucket_name = "jingdianwendang"

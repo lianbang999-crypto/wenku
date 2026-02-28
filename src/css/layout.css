@@ -1,0 +1,79 @@
+/* ============================================
+   Layout — Header & Content
+   ============================================ */
+
+/* Header */
+#header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: calc(var(--header-height) + var(--safe-top));
+  padding-top: var(--safe-top);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 12px;
+  padding-right: 12px;
+  background: var(--bg-header);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--divider);
+  z-index: 100;
+  transition: background-color 0.3s;
+}
+
+.header-back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: var(--text);
+  transition: background 0.2s;
+}
+
+.header-back:hover {
+  background: var(--accent-bg);
+}
+
+.header-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.header-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: var(--text-secondary);
+  transition: background 0.2s, color 0.2s;
+}
+
+.header-btn:hover {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+/* Content Area */
+#contentArea {
+  padding-top: calc(var(--header-height) + var(--safe-top) + 16px);
+  padding-bottom: calc(24px + var(--safe-bottom));
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* Scrollable container */
+.page-container {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 16px;
+}

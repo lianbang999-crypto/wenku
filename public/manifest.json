@@ -1,0 +1,21 @@
+{
+  "name": "法音文库",
+  "short_name": "法音文库",
+  "description": "净土宗讲义稿、佛教经论在线阅读",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAF9F6",
+  "theme_color": "#9A7B3C",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

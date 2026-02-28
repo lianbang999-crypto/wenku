@@ -1,0 +1,254 @@
+/* ============================================
+   Components — Search, Settings, Toast
+   ============================================ */
+
+/* Search Panel */
+.search-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--bg);
+  z-index: 200;
+  padding-top: var(--safe-top);
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--divider);
+}
+
+.search-bar svg {
+  flex-shrink: 0;
+  color: var(--text-tertiary);
+}
+
+.search-bar input {
+  flex: 1;
+  border: none;
+  background: none;
+  outline: none;
+  color: var(--text);
+  font-size: 16px;
+  padding: 8px 0;
+}
+
+.search-bar input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.search-close {
+  font-size: 15px;
+  color: var(--accent);
+  padding: 6px 8px;
+  white-space: nowrap;
+}
+
+.search-results {
+  padding: 12px 16px;
+  overflow-y: auto;
+  max-height: calc(100vh - 60px);
+}
+
+.search-empty {
+  text-align: center;
+  padding: 40px 0;
+  color: var(--text-tertiary);
+  font-size: 14px;
+}
+
+/* Reader Settings */
+.reader-settings {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 300;
+}
+
+.settings-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+}
+
+.settings-panel {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg-card);
+  border-radius: var(--radius) var(--radius) 0 0;
+  padding: 20px 20px calc(20px + var(--safe-bottom));
+  transform: translateY(0);
+  transition: transform 0.3s ease;
+}
+
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.settings-close-btn {
+  font-size: 22px;
+  color: var(--text-secondary);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-group {
+  margin-bottom: 20px;
+}
+
+.settings-group label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+  display: block;
+}
+
+.settings-options {
+  display: flex;
+  gap: 8px;
+}
+
+.settings-options button {
+  flex: 1;
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--text);
+  border: 1px solid var(--border);
+  transition: all 0.15s;
+}
+
+.settings-options button.active {
+  background: var(--accent);
+  color: #FFF;
+  border-color: var(--accent);
+}
+
+.settings-modes {
+  display: flex;
+  gap: 12px;
+}
+
+.mode-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 4px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  transition: all 0.15s;
+}
+
+.mode-btn.active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.mode-preview {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+.mode-normal { background: #FFFFFF; }
+.mode-sepia { background: #F5EDDC; }
+.mode-dark { background: #1A1A1A; }
+.mode-eink { background: #FAFAF5; border-style: dashed; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.75);
+  color: #FFF;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 14px;
+  z-index: 999;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.toast.show {
+  opacity: 1;
+}
+
+/* Loading */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+}
+
+.loading::after {
+  content: '';
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--divider);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-tertiary);
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.empty-state-text {
+  font-size: 15px;
+}
+
+/* Back to main site */
+.back-to-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 16px;
+  margin-top: 20px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  border-top: 1px solid var(--divider);
+}
+
+.back-to-main:hover {
+  color: var(--accent);
+}
