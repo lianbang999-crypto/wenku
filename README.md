@@ -30,8 +30,8 @@
 ## 快速开始
 
 ```bash
-git clone https://github.com/lianbang999-crypto/foyue-wenku.git
-cd foyue-wenku
+git clone https://github.com/lianbang999-crypto/wenku.git
+cd wenku
 npm install
 npm run dev
 npm run build
@@ -116,7 +116,7 @@ jingdianwendang 桶（304 个文件，97 MB）：
 | 项目 | 域名 | 功能 | 仓库 |
 |------|------|------|------|
 | 净土法音 | foyue.org | 音频播放器 | lianbang999-crypto/foyue |
-| 法音文库 | wenku.foyue.org | 文献阅读 | lianbang999-crypto/foyue-wenku |
+| 法音文库 | wenku.foyue.org | 文献阅读 | lianbang999-crypto/wenku |
 
 两个项目共用同一个 Cloudflare 账户下的 D1 数据库（foyue-db）和 R2 存储桶。
 
