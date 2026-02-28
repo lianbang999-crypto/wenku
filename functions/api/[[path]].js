@@ -59,6 +59,13 @@ export async function onRequest(context) {
       return json(await recordRead(db, body.documentId), cors);
     }
 
+    // GET /api/wenku/sync — 同步 R2 数据到 D1（一次性使用，完成后可删除此路由）
+    if (path === '/api/wenku/sync' && method === 'GET') {
+      const r2 = env.R2_WENKU || env.R2;
+      if (!r2) return json({ error: 'R2 binding not found (tried R2_WENKU and R2)' }, cors, 500);
+      return json(await syncR2ToD1(db, r2), cors);
+    }
+
     return json({ error: 'Not Found' }, cors, 404);
   } catch (err) {
     console.error('Wenku API Error:', err);
@@ -169,4 +176,147 @@ async function recordRead(db, documentId) {
   ).bind(documentId).run();
 
   return { success: true };
+}
+
+// ============================================================
+// R2 → D1 同步逻辑（一次性使用）
+// ============================================================
+
+async function syncR2ToD1(db, r2) {
+  const stats = { scanned: 0, inserted: 0, skipped: 0, errors: [] };
+
+  // 1. 列出 R2 桶中所有对象
+  let cursor = undefined;
+  const allObjects = [];
+
+  do {
+    const listed = await r2.list({ cursor, limit: 500 });
+    allObjects.push(...listed.objects);
+    cursor = listed.truncated ? listed.cursor : undefined;
+  } while (cursor);
+
+  stats.scanned = allObjects.length;
+
+  // 2. 获取已有文档的 r2_key
+  const existingDocs = await db.prepare('SELECT r2_key FROM documents').all();
+  const existingKeys = new Set(existingDocs.results.map(d => d.r2_key));
+
+  // 3. 遍历对象，解析元数据并入库
+  for (const obj of allObjects) {
+    const key = obj.key;
+
+    // 跳过目录标记
+    if (key.endsWith('/')) continue;
+
+    // 解析路径
+    const parsed = parseR2Key(key);
+    if (!parsed) {
+      stats.skipped++;
+      continue;
+    }
+
+    // 已存在则跳过
+    if (existingKeys.has(key)) {
+      stats.skipped++;
+      continue;
+    }
+
+    try {
+      // 如果是 TXT，读取内容
+      let content = null;
+      if (parsed.format === 'txt') {
+        const r2Obj = await r2.get(key);
+        if (r2Obj) {
+          content = await r2Obj.text();
+        }
+      }
+
+      // 生成 ID
+      const id = generateDocId(parsed);
+
+      await db.prepare(
+        `INSERT INTO documents (id, title, type, category, series_name, episode_num, format, r2_bucket, r2_key, content, file_size, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, 'jingdianwendang', ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`
+      ).bind(
+        id,
+        parsed.title,
+        parsed.type,
+        parsed.category,
+        parsed.seriesName,
+        parsed.episodeNum,
+        parsed.format,
+        key,
+        content,
+        obj.size,
+      ).run();
+
+      stats.inserted++;
+    } catch (err) {
+      stats.errors.push({ key, error: err.message });
+    }
+  }
+
+  return stats;
+}
+
+function parseR2Key(key) {
+  const parts = key.split('/');
+  const fileName = parts[parts.length - 1];
+  const ext = fileName.split('.').pop().toLowerCase();
+
+  let format = ext;
+  if (!['txt', 'pdf', 'epub', 'docx'].includes(format)) return null;
+
+  const category = parts[0];
+
+  // 大安法师讲义稿（TXT）
+  if (category === '大安法师' && parts.length >= 4 && format === 'txt') {
+    const seriesFolder = parts[2];
+    const seriesMatch = seriesFolder.match(/^\d+\s+(.+?)\s+\d+讲$/);
+    const seriesName = seriesMatch ? seriesMatch[1] : seriesFolder;
+    const epMatch = fileName.match(/第(\d+)讲/);
+    const episodeNum = epMatch ? parseInt(epMatch[1]) : null;
+    const title = fileName.replace(/\.txt$/i, '');
+    return { title, type: 'transcript', category: '大安法师', seriesName, episodeNum, format: 'txt' };
+  }
+
+  // 大安法师独立 PDF
+  if (category === '大安法师' && format === 'pdf') {
+    return { title: fileName.replace(/\.pdf(\.pdf)?$/i, ''), type: 'collection', category: '大安法师', seriesName: null, episodeNum: null, format: 'pdf' };
+  }
+
+  // 佛教经典
+  if (category === '佛教经典') {
+    return { title: fileName.replace(/\.\w+$/i, ''), type: 'sutra', category: '佛教经典', seriesName: null, episodeNum: null, format };
+  }
+
+  // 印光大师文钞
+  if (category === '印光大师文钞') {
+    return { title: fileName.replace(/\.\w+$/i, ''), type: 'collection', category: '印光大师文钞', seriesName: null, episodeNum: null, format };
+  }
+
+  // 省庵大师
+  if (category === '省庵大师') {
+    return { title: fileName.replace(/\.\w+$/i, ''), type: 'collection', category: '省庵大师', seriesName: null, episodeNum: null, format };
+  }
+
+  return null;
+}
+
+function generateDocId(parsed) {
+  const base = slugify(parsed.category);
+  if (parsed.seriesName && parsed.episodeNum !== null) {
+    return `${base}-${slugify(parsed.seriesName)}-${String(parsed.episodeNum).padStart(2, '0')}`;
+  }
+  return `${base}-${slugify(parsed.title)}`;
+}
+
+function slugify(str) {
+  return str
+    .replace(/[（）()《》\[\]【】]/g, '')
+    .replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .toLowerCase()
+    .slice(0, 50);
 }
