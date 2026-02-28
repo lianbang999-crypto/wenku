@@ -305,9 +305,21 @@ function parseR2Key(key) {
 
 function generateDocId(r2Key, parsed) {
   // 基于 R2 key 生成唯一 ID，确保不冲突
-  // 使用简易哈希：取 r2_key 的关键部分做 slug
   const keySlug = slugify(r2Key.replace(/\.\w+$/, ''));
-  return keySlug.slice(0, 80);
+  // 如果超长，截取后加简易哈希后缀避免冲突
+  if (keySlug.length > 120) {
+    const hash = simpleHash(r2Key);
+    return keySlug.slice(0, 110) + '-' + hash;
+  }
+  return keySlug;
+}
+
+function simpleHash(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = ((h << 5) - h + str.charCodeAt(i)) | 0;
+  }
+  return Math.abs(h).toString(36).slice(0, 8);
 }
 
 function slugify(str) {
@@ -316,6 +328,5 @@ function slugify(str) {
     .replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, '-')
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '')
-    .toLowerCase()
-    .slice(0, 50);
+    .toLowerCase();
 }
