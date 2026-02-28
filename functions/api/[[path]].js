@@ -63,7 +63,8 @@ export async function onRequest(context) {
     if (path === '/api/wenku/sync' && method === 'GET') {
       const r2 = env.R2_WENKU || env.R2;
       if (!r2) return json({ error: 'R2 binding not found (tried R2_WENKU and R2)' }, cors, 500);
-      return json(await syncR2ToD1(db, r2), cors);
+      const force = url.searchParams.get('force') === '1'; // force=1 则更新已有记录的内容
+      return json(await syncR2ToD1(db, r2, force), cors);
     }
 
     return json({ error: 'Not Found' }, cors, 404);
@@ -182,8 +183,8 @@ async function recordRead(db, documentId) {
 // R2 → D1 同步逻辑（一次性使用）
 // ============================================================
 
-async function syncR2ToD1(db, r2) {
-  const stats = { scanned: 0, inserted: 0, skipped: 0, errors: [] };
+async function syncR2ToD1(db, r2, force = false) {
+  const stats = { scanned: 0, inserted: 0, updated: 0, skipped: 0, errors: [] };
 
   // 1. 列出 R2 桶中所有对象
   let cursor = undefined;
@@ -198,8 +199,8 @@ async function syncR2ToD1(db, r2) {
   stats.scanned = allObjects.length;
 
   // 2. 获取已有文档的 r2_key
-  const existingDocs = await db.prepare('SELECT r2_key FROM documents').all();
-  const existingKeys = new Set(existingDocs.results.map(d => d.r2_key));
+  const existingDocs = await db.prepare('SELECT id, r2_key FROM documents').all();
+  const existingMap = new Map(existingDocs.results.map(d => [d.r2_key, d.id]));
 
   // 3. 遍历对象，解析元数据并入库
   for (const obj of allObjects) {
@@ -215,42 +216,58 @@ async function syncR2ToD1(db, r2) {
       continue;
     }
 
-    // 已存在则跳过
-    if (existingKeys.has(key)) {
+    // 已存在且非强制模式则跳过
+    if (existingMap.has(key) && !force) {
       stats.skipped++;
       continue;
     }
 
     try {
-      // 如果是 TXT，读取内容
+      // 如果是 TXT，读取内容（尝试多种编码）
       let content = null;
       if (parsed.format === 'txt') {
         const r2Obj = await r2.get(key);
         if (r2Obj) {
-          content = await r2Obj.text();
+          const buf = await r2Obj.arrayBuffer();
+          // 先尝试 UTF-8，如果出现替换字符再用 GBK
+          content = new TextDecoder('utf-8').decode(buf);
+          if (content.includes('\uFFFD')) {
+            // UTF-8 解码失败，尝试 GBK
+            try {
+              content = new TextDecoder('gbk').decode(buf);
+            } catch (e) {
+              // GBK 不可用，保留 UTF-8 结果
+            }
+          }
         }
       }
 
-      // 使用 R2 key 生成唯一 ID
       const id = generateDocId(key, parsed);
 
-      await db.prepare(
-        `INSERT INTO documents (id, title, type, category, series_name, episode_num, format, r2_bucket, r2_key, content, file_size, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, 'jingdianwendang', ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`
-      ).bind(
-        id,
-        parsed.title,
-        parsed.type,
-        parsed.category,
-        parsed.seriesName,
-        parsed.episodeNum,
-        parsed.format,
-        key,
-        content,
-        obj.size,
-      ).run();
-
-      stats.inserted++;
+      if (existingMap.has(key) && force) {
+        // 强制更新：覆盖已有记录的内容
+        await db.prepare(
+          `UPDATE documents SET content = ?, updated_at = CURRENT_TIMESTAMP WHERE r2_key = ?`
+        ).bind(content, key).run();
+        stats.updated++;
+      } else {
+        await db.prepare(
+          `INSERT INTO documents (id, title, type, category, series_name, episode_num, format, r2_bucket, r2_key, content, file_size, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, 'jingdianwendang', ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`
+        ).bind(
+          id,
+          parsed.title,
+          parsed.type,
+          parsed.category,
+          parsed.seriesName,
+          parsed.episodeNum,
+          parsed.format,
+          key,
+          content,
+          obj.size,
+        ).run();
+        stats.inserted++;
+      }
     } catch (err) {
       stats.errors.push({ key, error: err.message });
     }
