@@ -1,0 +1,11 @@
+# 静态资源长期缓存（Vite 构建的文件名含哈希，天然唯一）
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# PWA 图标缓存 7 天
+/icons/*
+  Cache-Control: public, max-age=604800
+
+# Manifest 缓存 1 天
+/manifest.json
+  Cache-Control: public, max-age=86400

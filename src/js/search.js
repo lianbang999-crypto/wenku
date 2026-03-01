@@ -1,7 +1,7 @@
 /* 搜索功能 */
 import { searchDocuments } from './api.js';
 import { navigate } from './router.js';
-import { debounce } from './utils.js';
+import { debounce, escapeHtml } from './utils.js';
 
 export function initSearch() {
   const searchBtn = document.getElementById('searchBtn');
@@ -45,10 +45,10 @@ export function initSearch() {
       }
 
       searchResults.innerHTML = results.map(doc => `
-        <div class="series-item" data-doc-id="${doc.id}" data-format="${doc.format || 'txt'}">
+        <div class="series-item" data-doc-id="${escapeHtml(doc.id)}" data-format="${escapeHtml(doc.format || 'txt')}">
           <div class="series-info">
-            <div class="series-title">${doc.title}</div>
-            <div class="series-meta">${doc.category}${doc.series_name ? ' · ' + doc.series_name : ''}</div>
+            <div class="series-title">${escapeHtml(doc.title)}</div>
+            <div class="series-meta">${escapeHtml(doc.category)}${doc.series_name ? ' · ' + escapeHtml(doc.series_name) : ''}</div>
           </div>
         </div>
       `).join('');

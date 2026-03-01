@@ -1,6 +1,7 @@
 /* 分类列表页 */
 import { navigate } from '../router.js';
 import { getDocumentsByCategory } from '../api.js';
+import { escapeHtml } from '../utils.js';
 
 export async function renderCategory(container, category) {
   const data = await getDocumentsByCategory(category);
@@ -34,9 +35,9 @@ export async function renderCategory(container, category) {
     html += '<div class="section-label">系列讲义</div><div class="series-list">';
     for (const s of seriesList) {
       html += `
-        <div class="series-item" data-series="${s.name}">
+        <div class="series-item" data-series="${escapeHtml(s.name)}">
           <div class="series-info">
-            <div class="series-title">${s.name}</div>
+            <div class="series-title">${escapeHtml(s.name)}</div>
             <div class="series-meta">${s.count} 讲${s.hasAudio ? ' · 🎧 有音频' : ''}</div>
           </div>
           <div class="category-arrow">
@@ -54,9 +55,9 @@ export async function renderCategory(container, category) {
     for (const doc of standalone) {
       const badge = doc.format === 'pdf' ? 'PDF' : doc.format === 'epub' ? 'EPUB' : '';
       html += `
-        <div class="series-item" data-doc-id="${doc.id}" data-format="${doc.format}" data-r2-key="${doc.r2_key || ''}">
+        <div class="series-item" data-doc-id="${escapeHtml(doc.id)}" data-format="${escapeHtml(doc.format)}" data-r2-key="${escapeHtml(doc.r2_key || '')}">
           <div class="series-info">
-            <div class="series-title">${doc.title}</div>
+            <div class="series-title">${escapeHtml(doc.title)}</div>
             <div class="series-meta">${doc.format.toUpperCase()}${doc.file_size ? ' · ' + formatFileSize(doc.file_size) : ''}</div>
           </div>
           ${badge ? `<span class="series-badge">${badge}</span>` : ''}

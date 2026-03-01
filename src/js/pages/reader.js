@@ -1,7 +1,7 @@
 /* 阅读页 */
 import { getDocument, recordRead } from '../api.js';
 import { state, saveBookmark, getBookmark } from '../state.js';
-import { textToHtml, debounce } from '../utils.js';
+import { textToHtml, debounce, escapeHtml } from '../utils.js';
 
 let scrollHandler = null;
 
@@ -35,9 +35,9 @@ export async function renderReader(container, documentId) {
   container.innerHTML = `
     <div class="reader-container">
       <div class="reader-header">
-        <div class="reader-series-title">${doc.series_name || doc.category || ''}</div>
-        <h2 class="reader-title">${doc.title}</h2>
-        <div class="reader-author">${doc.category || ''}</div>
+        <div class="reader-series-title">${escapeHtml(doc.series_name || doc.category || '')}</div>
+        <h2 class="reader-title">${escapeHtml(doc.title)}</h2>
+        <div class="reader-author">${escapeHtml(doc.category || '')}</div>
       </div>
       <div class="reader-body" id="readerBody">
         ${contentHtml}
@@ -45,9 +45,9 @@ export async function renderReader(container, documentId) {
     </div>
 
     <div class="reader-footer">
-      <button class="reader-nav-btn" id="prevBtn" ${!prevId ? 'disabled' : ''} data-id="${prevId || ''}">← 上一讲</button>
+      <button class="reader-nav-btn" id="prevBtn" ${!prevId ? 'disabled' : ''} data-id="${escapeHtml(prevId || '')}">← 上一讲</button>
       <div class="reader-progress">${currentEp && totalEpisodes ? currentEp + '/' + totalEpisodes : ''}</div>
-      <button class="reader-nav-btn" id="nextBtn" ${!nextId ? 'disabled' : ''} data-id="${nextId || ''}">下一讲 →</button>
+      <button class="reader-nav-btn" id="nextBtn" ${!nextId ? 'disabled' : ''} data-id="${escapeHtml(nextId || '')}">下一讲 →</button>
     </div>
   `;
 

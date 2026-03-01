@@ -1,6 +1,7 @@
 /* 首页 */
 import { navigate } from '../router.js';
 import { getRecentBookmarks } from '../state.js';
+import { escapeHtml } from '../utils.js';
 
 export async function renderHome(container) {
   const recent = getRecentBookmarks(1);
@@ -12,8 +13,8 @@ export async function renderHome(container) {
     const readableTitle = docId.replace(/-/g, ' ');
     continueHtml = `
       <div class="section-label">继续阅读</div>
-      <div class="continue-card" data-doc="${docId}">
-        <div class="continue-title">${readableTitle}</div>
+      <div class="continue-card" data-doc="${escapeHtml(docId)}">
+        <div class="continue-title">${escapeHtml(readableTitle)}</div>
         <div class="continue-meta">已读 ${Math.round(percent)}%</div>
         <div class="continue-progress">
           <div class="continue-progress-bar" style="width:${percent}%"></div>

@@ -2,6 +2,7 @@
 import { navigate } from '../router.js';
 import { getDocumentsBySeries } from '../api.js';
 import { getBookmark } from '../state.js';
+import { escapeHtml } from '../utils.js';
 
 export async function renderSeries(container, category, seriesName) {
   const data = await getDocumentsBySeries(category, seriesName);
@@ -16,8 +17,8 @@ export async function renderSeries(container, category, seriesName) {
   const hasAudio = documents.some(d => d.audio_series_id);
   html += `
     <div style="margin-bottom:20px;">
-      <div style="font-size:13px;color:var(--text-secondary);margin-bottom:4px">${category}</div>
-      <div style="font-size:20px;font-weight:700;color:var(--text);margin-bottom:8px">${seriesName}</div>
+      <div style="font-size:13px;color:var(--text-secondary);margin-bottom:4px">${escapeHtml(category)}</div>
+      <div style="font-size:20px;font-weight:700;color:var(--text);margin-bottom:8px">${escapeHtml(seriesName)}</div>
       <div style="font-size:14px;color:var(--text-secondary)">共 ${documents.length} 讲</div>
       ${hasAudio ? `
         <a href="https://foyue.org" class="reader-listen-btn" style="display:inline-flex;margin-top:10px">
@@ -35,9 +36,9 @@ export async function renderSeries(container, category, seriesName) {
     const readMark = bookmark ? `<span class="episode-read-mark">${Math.round(bookmark.percent)}%</span>` : '';
 
     html += `
-      <div class="episode-item" data-doc-id="${doc.id}">
+      <div class="episode-item" data-doc-id="${escapeHtml(doc.id)}">
         <div class="episode-num">${doc.episode_num || '-'}</div>
-        <div class="episode-title">${doc.title}</div>
+        <div class="episode-title">${escapeHtml(doc.title)}</div>
         ${readMark}
       </div>
     `;
