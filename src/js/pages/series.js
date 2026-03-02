@@ -18,13 +18,14 @@ export async function renderSeries(container, category, seriesName) {
 
   // 系列信息
   const hasAudio = documents.some(d => d.audio_series_id);
+  const audioSeriesId = hasAudio ? documents.find(d => d.audio_series_id)?.audio_series_id : null;
   html += `
     <div style="margin-bottom:20px;">
       <div style="font-size:13px;color:var(--text-secondary);margin-bottom:4px">${category}</div>
       <div style="font-size:20px;font-weight:700;color:var(--text);margin-bottom:8px">${seriesName}</div>
       <div style="font-size:14px;color:var(--text-secondary)">共 ${documents.length} 讲</div>
       ${hasAudio ? `
-        <a href="https://foyue.org" class="reader-listen-btn" style="display:inline-flex;margin-top:10px">
+        <a href="https://foyue.org${audioSeriesId ? '/?series=' + encodeURIComponent(audioSeriesId) : ''}" target="_blank" rel="noopener" class="reader-listen-btn" style="display:inline-flex;margin-top:10px">
           <svg viewBox="0 0 24 24" width="14" height="14"><path d="M12 3v9.28a4.39 4.39 0 00-1.5-.28C8.01 12 6 14.01 6 16.5S8.01 21 10.5 21c2.31 0 4.2-1.75 4.45-4H15V6h4V3h-7z" fill="currentColor"/></svg>
           收听此系列
         </a>
