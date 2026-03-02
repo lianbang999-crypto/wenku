@@ -1,6 +1,6 @@
 /* ============================================
-   Components — Search, Settings, Toast
-   ============================================ */
+     Components — Search, Settings, Toast
+     ============================================ */
 
 /* Search Panel */
 .search-panel {
@@ -201,19 +201,29 @@
 /* Loading */
 .loading {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 40px;
+  padding: 60px 20px;
+  min-height: 200px;
 }
 
 .loading::after {
   content: '';
-  width: 28px;
-  height: 28px;
-  border: 2px solid var(--divider);
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--divider);
   border-top-color: var(--accent);
   border-radius: 50%;
-  animation: spin 0.6s linear infinite;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 16px;
+}
+
+.loading::before {
+  content: '加载中...';
+  font-size: 14px;
+  color: var(--text-secondary);
+  order: 2;
 }
 
 @keyframes spin {

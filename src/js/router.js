@@ -1,13 +1,16 @@
 /* 路由管理 */
 import { state } from './state.js';
-import { renderHome } from './pages/home.js';
-import { renderCategory } from './pages/category.js';
-import { renderSeries } from './pages/series.js';
-import { renderReader } from './pages/reader.js';
+import { resetMeta } from './seo.js';
 
 const content = () => document.getElementById('contentArea');
 const headerTitle = () => document.getElementById('headerTitle');
 const headerBack = () => document.getElementById('headerBack');
+
+// 懒加载页面组件
+const loadHome = () => import('./pages/home.js');
+const loadCategory = () => import('./pages/category.js');
+const loadSeries = () => import('./pages/series.js');
+const loadReader = () => import('./pages/reader.js');
 
 /** 解析 hash 路由 */
 function parseRoute() {
@@ -42,20 +45,30 @@ async function onRouteChange() {
 
   try {
     switch (parsed.route) {
-      case 'home':
-        await renderHome(el);
+      case 'home': {
+        const module = await loadHome();
+        await module.renderHome(el);
         break;
-      case 'category':
-        await renderCategory(el, parsed.categoryId);
+      }
+      case 'category': {
+        const module = await loadCategory();
+        await module.renderCategory(el, parsed.categoryId);
         break;
-      case 'series':
-        await renderSeries(el, parsed.categoryId, parsed.seriesName);
+      }
+      case 'series': {
+        const module = await loadSeries();
+        await module.renderSeries(el, parsed.categoryId, parsed.seriesName);
         break;
-      case 'read':
-        await renderReader(el, parsed.documentId);
+      }
+      case 'read': {
+        const module = await loadReader();
+        await module.renderReader(el, parsed.documentId);
         break;
-      default:
-        await renderHome(el);
+      }
+      default: {
+        const module = await loadHome();
+        await module.renderHome(el);
+      }
     }
   } catch (err) {
     console.error('Route render error:', err);
@@ -72,6 +85,7 @@ function updateHeader(parsed) {
       title.textContent = '法音文库';
       back.href = 'https://foyue.org';
       back.title = '返回净土法音';
+      resetMeta();
       break;
     case 'category':
       title.textContent = parsed.categoryId;
