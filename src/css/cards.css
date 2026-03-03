@@ -46,7 +46,12 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  font-size: 24px;
+  color: var(--accent);
+}
+
+.category-icon svg {
+  width: 24px;
+  height: 24px;
 }
 
 .category-info {
@@ -72,6 +77,16 @@
 .category-arrow {
   color: var(--text-tertiary);
   flex-shrink: 0;
+}
+
+/* External link card (e.g. 东林期刊) */
+.category-card--external {
+  text-decoration: none;
+  color: inherit;
+}
+
+.category-card--external .category-arrow {
+  color: var(--text-tertiary);
 }
 
 /* Series list item */

@@ -30,7 +30,13 @@ export async function renderHome(container) {
       <div class="section-label">文库分类</div>
 
       <div class="category-card" data-category="大安法师">
-        <div class="category-icon">📖</div>
+        <div class="category-icon">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
+            <path d="M8 7h6"/>
+            <path d="M8 11h4"/>
+          </svg>
+        </div>
         <div class="category-info">
           <div class="category-title">讲义稿</div>
           <div class="category-desc">大安法师讲法集 · 约35个系列</div>
@@ -40,38 +46,24 @@ export async function renderHome(container) {
         </div>
       </div>
 
-      <div class="category-card" data-category="佛教经典">
-        <div class="category-icon">📜</div>
+      <a href="https://book.lsdls.cn/bookcase/dewwg/index.html" target="_blank" rel="noopener" class="category-card category-card--external">
+        <div class="category-icon">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+          </svg>
+        </div>
         <div class="category-info">
-          <div class="category-title">佛教经典</div>
-          <div class="category-desc">金刚经 · 无量寿经 · 净土五经一论 · 地藏经</div>
+          <div class="category-title">东林期刊</div>
+          <div class="category-desc">佛经 · 善书 · 净土杂志 · 祖师论著 · 共102本</div>
         </div>
         <div class="category-arrow">
-          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" fill="currentColor"/></svg>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 17L17 7"/>
+            <path d="M7 7h10v10"/>
+          </svg>
         </div>
-      </div>
-
-      <div class="category-card" data-category="印光大师文钞">
-        <div class="category-icon">✏️</div>
-        <div class="category-info">
-          <div class="category-title">印光大师文钞</div>
-          <div class="category-desc">文钞菁华录 · 嘉言录 · 净土法要</div>
-        </div>
-        <div class="category-arrow">
-          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" fill="currentColor"/></svg>
-        </div>
-      </div>
-
-      <div class="category-card" data-category="省庵大师">
-        <div class="category-icon">📿</div>
-        <div class="category-info">
-          <div class="category-title">省庵大师</div>
-          <div class="category-desc">省庵法师语录</div>
-        </div>
-        <div class="category-arrow">
-          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" fill="currentColor"/></svg>
-        </div>
-      </div>
+      </a>
 
       <a href="https://foyue.org" class="back-to-main">
         <svg viewBox="0 0 24 24" width="16" height="16"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" fill="currentColor"/></svg>
