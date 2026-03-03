@@ -129,6 +129,39 @@ function parseR2Key(key) {
 
   // 大安法师讲义稿
   if (category === '大安法师' && parts.length >= 4 && format === 'txt') {
+    // 处理「已用」子文件夹：大安法师/大安法师（讲法集）TXT/已用/02 佛说阿弥陀经（新加坡） 7讲/...
+    // 已用中有重复内容（跳过）和独有内容（提取正确系列名）
+    if (parts[2] === '已用' && parts.length >= 5) {
+      const subFolder = parts[3]; // "02 佛说阿弥陀经（新加坡） 7讲"
+
+      // 跳过已知重复的子文件夹（与正式系列内容相同）
+      const duplicateFolders = [
+        /一函遍复\s+\d+讲/,
+        /龙舒净土文（马来西亚）\s+\d+讲/,
+      ];
+      if (duplicateFolders.some(re => re.test(subFolder))) {
+        return null; // 跳过重复内容
+      }
+
+      // 提取系列名：去掉开头编号和结尾"N讲/N辑"
+      const subMatch = subFolder.match(/^\d+\s+(.+?)\s+\d+[讲辑]$/);
+      const seriesName = subMatch ? subMatch[1] : subFolder;
+
+      const epMatch = fileName.match(/第(\d+)[讲辑]/);
+      const episodeNum = epMatch ? parseInt(epMatch[1]) : null;
+
+      const title = fileName.replace(/\.txt$/i, '');
+
+      return {
+        title,
+        type: 'transcript',
+        category: '大安法师',
+        seriesName,
+        episodeNum,
+        format: 'txt',
+      };
+    }
+
     const seriesFolder = parts[2]; // "01 佛说无量寿经 要义全卷 24讲"
     // 提取系列名：去掉开头编号和结尾"N讲"
     const seriesMatch = seriesFolder.match(/^\d+\s+(.+?)\s+\d+讲$/);
