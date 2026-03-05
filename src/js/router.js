@@ -14,14 +14,19 @@ const loadReader = () => import('./pages/reader.js');
 
 /** 解析 hash 路由 */
 function parseRoute() {
-  const hash = location.hash.slice(1) || '/';
-  const parts = hash.split('/').filter(Boolean);
+  const raw = location.hash.slice(1) || '/';
+  // 分离 query string（支持 #/read/docId?q=keyword 格式）
+  const qIdx = raw.indexOf('?');
+  const path = qIdx >= 0 ? raw.slice(0, qIdx) : raw;
+  const query = qIdx >= 0 ? Object.fromEntries(new URLSearchParams(raw.slice(qIdx + 1))) : {};
 
-  if (parts.length === 0) return { route: 'home' };
-  if (parts[0] === 'category' && parts[1]) return { route: 'category', categoryId: decodeURIComponent(parts[1]) };
-  if (parts[0] === 'series' && parts[1] && parts[2]) return { route: 'series', categoryId: decodeURIComponent(parts[1]), seriesName: decodeURIComponent(parts[2]) };
-  if (parts[0] === 'read' && parts[1]) return { route: 'read', documentId: decodeURIComponent(parts[1]) };
-  return { route: 'home' };
+  const parts = path.split('/').filter(Boolean);
+
+  if (parts.length === 0) return { route: 'home', query };
+  if (parts[0] === 'category' && parts[1]) return { route: 'category', categoryId: decodeURIComponent(parts[1]), query };
+  if (parts[0] === 'series' && parts[1] && parts[2]) return { route: 'series', categoryId: decodeURIComponent(parts[1]), seriesName: decodeURIComponent(parts[2]), query };
+  if (parts[0] === 'read' && parts[1]) return { route: 'read', documentId: decodeURIComponent(parts[1]), query };
+  return { route: 'home', query };
 }
 
 /** 导航到指定路由 */
@@ -62,7 +67,7 @@ async function onRouteChange() {
       }
       case 'read': {
         const module = await loadReader();
-        await module.renderReader(el, parsed.documentId);
+        await module.renderReader(el, parsed.documentId, parsed.query);
         break;
       }
       default: {

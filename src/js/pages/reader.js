@@ -6,7 +6,7 @@ import { setDocumentMeta } from '../seo.js';
 
 let scrollHandler = null;
 
-export async function renderReader(container, documentId) {
+export async function renderReader(container, documentId, query = {}) {
   const data = await getDocument(documentId);
   const doc = data.document;
 
@@ -61,13 +61,19 @@ export async function renderReader(container, documentId) {
   // 记录阅读
   recordRead(documentId);
 
-  // 恢复阅读进度
+  // 恢复阅读进度（仅在无搜索高亮时）
+  const highlightQuery = query.q ? query.q.trim() : '';
   const bookmark = getBookmark(documentId);
-  if (bookmark && bookmark.percent > 0) {
+  if (!highlightQuery && bookmark && bookmark.percent > 0) {
     requestAnimationFrame(() => {
       const scrollTarget = (document.documentElement.scrollHeight - window.innerHeight) * (bookmark.percent / 100);
       window.scrollTo(0, scrollTarget);
     });
+  }
+
+  // 搜索高亮：如果 URL 带 ?q= 参数，高亮匹配文本并滚动到第一个匹配
+  if (highlightQuery) {
+    requestAnimationFrame(() => highlightAndScroll(highlightQuery));
   }
 
   // 保存阅读进度
@@ -116,4 +122,62 @@ function addReaderHeaderActions() {
 
   searchBtn.parentNode.insertBefore(settingsBtn, searchBtn);
   searchBtn.style.display = 'none';
+}
+
+/**
+ * 在 readerBody 中高亮匹配文本并滚动到第一个匹配位置
+ */
+function highlightAndScroll(query) {
+  const body = document.getElementById('readerBody');
+  if (!body || !query) return;
+
+  // 将查询拆分为关键词（按空格分隔），逐个高亮
+  const keywords = query.split(/\s+/).filter(k => k.length >= 2);
+  if (!keywords.length) return;
+
+  // 构建正则：匹配所有关键词
+  const escaped = keywords.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  const regex = new RegExp(`(${escaped.join('|')})`, 'gi');
+
+  let firstMark = null;
+
+  // 遍历所有文本节点进行高亮
+  const walker = document.createTreeWalker(body, NodeFilter.SHOW_TEXT, null);
+  const textNodes = [];
+  while (walker.nextNode()) textNodes.push(walker.currentNode);
+
+  for (const node of textNodes) {
+    const text = node.textContent;
+    if (!regex.test(text)) continue;
+    regex.lastIndex = 0;
+
+    const frag = document.createDocumentFragment();
+    let lastIdx = 0;
+    let match;
+    while ((match = regex.exec(text)) !== null) {
+      // 匹配前的文本
+      if (match.index > lastIdx) {
+        frag.appendChild(document.createTextNode(text.slice(lastIdx, match.index)));
+      }
+      // 高亮的 mark 标签
+      const mark = document.createElement('mark');
+      mark.className = 'search-highlight';
+      mark.textContent = match[0];
+      frag.appendChild(mark);
+      if (!firstMark) firstMark = mark;
+      lastIdx = regex.lastIndex;
+    }
+    // 剩余文本
+    if (lastIdx < text.length) {
+      frag.appendChild(document.createTextNode(text.slice(lastIdx)));
+    }
+    node.parentNode.replaceChild(frag, node);
+  }
+
+  // 滚动到第一个匹配
+  if (firstMark) {
+    setTimeout(() => {
+      firstMark.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
+  }
 }

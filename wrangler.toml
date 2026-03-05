@@ -9,3 +9,12 @@ database_id = "be0b21ab-4549-45bc-ac38-5f9e1864d061"
 [[r2_buckets]]
 binding = "R2_WENKU"
 bucket_name = "jingdianwendang"
+
+# Workers AI 绑定
+[ai]
+binding = "AI"
+
+# Vectorize 向量数据库绑定
+[[vectorize]]
+binding = "VECTORIZE"
+index_name = "dharma-content"
