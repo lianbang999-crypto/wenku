@@ -125,14 +125,33 @@ function addReaderHeaderActions() {
 }
 
 /**
+ * 从查询文本中提取有意义的关键词
+ * 支持中文（无空格）和英文（空格分隔）
+ */
+function extractKeywords(query) {
+  // 先按空格拆分
+  const parts = query.split(/\s+/).filter(k => k.length >= 2);
+  if (parts.length > 1) return parts;
+
+  // 无空格的中文句子：去掉常见虚词/疑问词，提取实词
+  const stopWords = /什么|怎么|怎样|如何|为什么|哪些|哪个|可以|能够|应该|是不是|有没有|到底|究竟|请问|的|了|吗|呢|吧|啊|在|是|有|和|与|或|也|都|就|把|被|对|又|要|让|给|从|用|以|而|但|却|不|很|最|更|还|这|那|它|你|我|他|她|们|个|着/g;
+  const cleaned = query.replace(stopWords, ' ').trim();
+  const words = cleaned.split(/\s+/).filter(k => k.length >= 2);
+  if (words.length > 0) return words;
+
+  // 兜底：如果清理后无有效词，把原查询作为整体
+  return [query];
+}
+
+/**
  * 在 readerBody 中高亮匹配文本并滚动到第一个匹配位置
  */
 function highlightAndScroll(query) {
   const body = document.getElementById('readerBody');
   if (!body || !query) return;
 
-  // 将查询拆分为关键词（按空格分隔），逐个高亮
-  const keywords = query.split(/\s+/).filter(k => k.length >= 2);
+  // 提取关键词
+  const keywords = extractKeywords(query);
   if (!keywords.length) return;
 
   // 构建正则：匹配所有关键词
